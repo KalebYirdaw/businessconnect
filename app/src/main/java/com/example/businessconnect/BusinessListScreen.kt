@@ -1,5 +1,6 @@
 package com.example.businessconnect
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +12,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -23,12 +28,31 @@ import androidx.compose.ui.unit.dp
 fun BusinessListScreen(
     viewModel: BusinessViewModel,
     modifier: Modifier = Modifier,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onBusinessClick: (BusinessEntity) -> Unit
 ) {
 
     val businesses by viewModel.businesses.collectAsState(
         initial = emptyList()
     )
+
+    var searchText by remember {
+        mutableStateOf("")
+    }
+
+    val filteredBusinesses = businesses.filter { business ->
+
+        val search = searchText.trim()
+
+        if (search.isBlank()) {
+            true
+        } else {
+            business.businessName.contains(search, ignoreCase = true) ||
+                    business.ownerName.contains(search, ignoreCase = true) ||
+                    business.productName.contains(search, ignoreCase = true) ||
+                    business.businessType.contains(search, ignoreCase = true)
+        }
+    }
 
     Column(
         modifier = modifier
@@ -42,21 +66,46 @@ fun BusinessListScreen(
             Text("← Back")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         Text(
             text = "Businesses",
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        OutlinedTextField(
+            value = searchText,
+            onValueChange = {
+                searchText = it
+            },
+            label = {
+                Text("Search businesses")
+            },
+            placeholder = {
+                Text("Name, owner, product or type")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
 
         Text(
-            text = "${businesses.size} business(es) saved",
+            text = "${filteredBusinesses.size} of ${businesses.size} business(es)",
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         if (businesses.isEmpty()) {
 
@@ -70,10 +119,33 @@ fun BusinessListScreen(
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
 
                 Text(
                     text = "Add a business from the dashboard to see it here.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+        } else if (filteredBusinesses.isEmpty()) {
+
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+
+                Text(
+                    text = "No matching businesses found.",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Spacer(
+                    modifier = Modifier.height(8.dp)
+                )
+
+                Text(
+                    text = "Try a different business name, owner, product or type.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -85,12 +157,15 @@ fun BusinessListScreen(
             ) {
 
                 items(
-                    items = businesses,
+                    items = filteredBusinesses,
                     key = { business -> business.id }
                 ) { business ->
 
                     BusinessCard(
-                        business = business
+                        business = business,
+                        onClick = {
+                            onBusinessClick(business)
+                        }
                     )
 
                     Spacer(
@@ -104,11 +179,16 @@ fun BusinessListScreen(
 
 @Composable
 fun BusinessCard(
-    business: BusinessEntity
+    business: BusinessEntity,
+    onClick: () -> Unit
 ) {
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            }
     ) {
 
         Column(
@@ -122,20 +202,34 @@ fun BusinessCard(
                 style = MaterialTheme.typography.titleLarge
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
 
             Text(
-                text = "Type: ${business.businessType.ifBlank { "Not provided" }}",
+                text = "Type: ${
+                    business.businessType.ifBlank {
+                        "Not provided"
+                    }
+                }",
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = "Owner: ${business.ownerName.ifBlank { "Not provided" }}",
+                text = "Owner: ${
+                    business.ownerName.ifBlank {
+                        "Not provided"
+                    }
+                }",
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = "Phone: ${business.businessPhone.ifBlank { "Not provided" }}",
+                text = "Phone: ${
+                    business.businessPhone.ifBlank {
+                        "Not provided"
+                    }
+                }",
                 style = MaterialTheme.typography.bodyMedium
             )
 
@@ -145,16 +239,33 @@ fun BusinessCard(
                         business.city,
                         business.province
                     )
-                        .filter { it.isNotBlank() }
+                        .filter {
+                            it.isNotBlank()
+                        }
                         .joinToString(", ")
-                        .ifBlank { "Not provided" }
+                        .ifBlank {
+                            "Not provided"
+                        }
                 }",
                 style = MaterialTheme.typography.bodyMedium
             )
 
             Text(
-                text = "Product: ${business.productName.ifBlank { "Not provided" }}",
+                text = "Product: ${
+                    business.productName.ifBlank {
+                        "Not provided"
+                    }
+                }",
                 style = MaterialTheme.typography.bodyMedium
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = "Tap to view full information",
+                style = MaterialTheme.typography.labelMedium
             )
         }
     }
