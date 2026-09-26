@@ -23,7 +23,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.businessconnect.ui.theme.BusinessConnectTheme
 
 class MainActivity : ComponentActivity() {
@@ -51,6 +53,20 @@ fun BusinessConnectApp() {
         BusinessData()
     }
 
+    val context = LocalContext.current
+
+    val database = remember(context) {
+        BusinessDatabase.getDatabase(context)
+    }
+
+    val repository = remember(database) {
+        BusinessRepository(database.businessDao())
+    }
+
+    val viewModel: BusinessViewModel = viewModel(
+        factory = BusinessViewModelFactory(repository)
+    )
+
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
@@ -63,6 +79,9 @@ fun BusinessConnectApp() {
                     modifier = Modifier.padding(innerPadding),
                     onAddBusiness = {
                         currentScreen = "addBusiness"
+                    },
+                    onViewBusinesses = {
+                        currentScreen = "businessList"
                     }
                 )
             }
@@ -132,6 +151,47 @@ fun BusinessConnectApp() {
                         currentScreen = "products"
                     },
                     onSave = {
+
+                        val business = BusinessEntity(
+
+                            businessName = businessData.businessName,
+                            businessType = businessData.businessType,
+                            registrationNumber = businessData.registrationNumber,
+                            businessPhone = businessData.businessPhone,
+                            businessEmail = businessData.businessEmail,
+
+                            ownerName = businessData.ownerName,
+                            contactPerson = businessData.contactPerson,
+                            ownerPhone = businessData.ownerPhone,
+                            ownerEmail = businessData.ownerEmail,
+
+                            streetAddress = businessData.streetAddress,
+                            city = businessData.city,
+                            province = businessData.province,
+                            postalCode = businessData.postalCode,
+                            latitude = businessData.latitude,
+                            longitude = businessData.longitude,
+
+                            productName = businessData.productName,
+                            productCategory = businessData.productCategory,
+                            productDescription = businessData.productDescription,
+                            price = businessData.price,
+                            quantity = businessData.quantity
+                        )
+
+                        viewModel.saveBusiness(business)
+
+                        currentScreen = "dashboard"
+                    }
+                )
+            }
+
+            "businessList" -> {
+
+                BusinessListScreen(
+                    viewModel = viewModel,
+                    modifier = Modifier.padding(innerPadding),
+                    onBack = {
                         currentScreen = "dashboard"
                     }
                 )
@@ -143,7 +203,8 @@ fun BusinessConnectApp() {
 @Composable
 fun DashboardScreen(
     modifier: Modifier = Modifier,
-    onAddBusiness: () -> Unit
+    onAddBusiness: () -> Unit,
+    onViewBusinesses: () -> Unit
 ) {
 
     Column(
@@ -177,9 +238,7 @@ fun DashboardScreen(
         Spacer(modifier = Modifier.height(12.dp))
 
         OutlinedButton(
-            onClick = {
-                // We will build this later
-            },
+            onClick = onViewBusinesses,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("View Businesses")
