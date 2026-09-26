@@ -50,7 +50,8 @@ fun BusinessListScreen(
             business.businessName.contains(search, ignoreCase = true) ||
                     business.ownerName.contains(search, ignoreCase = true) ||
                     business.productName.contains(search, ignoreCase = true) ||
-                    business.businessType.contains(search, ignoreCase = true)
+                    business.businessType.contains(search, ignoreCase = true) ||
+                    business.storeStatus.contains(search, ignoreCase = true)
         }
     }
 
@@ -88,7 +89,7 @@ fun BusinessListScreen(
                 Text("Search businesses")
             },
             placeholder = {
-                Text("Name, owner, product or type")
+                Text("Name, owner, product, type or status")
             },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
@@ -145,7 +146,7 @@ fun BusinessListScreen(
                 )
 
                 Text(
-                    text = "Try a different business name, owner, product or type.",
+                    text = "Try a different business name, owner, product, type or status.",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -204,6 +205,15 @@ fun BusinessCard(
 
             Spacer(
                 modifier = Modifier.height(8.dp)
+            )
+
+            Text(
+                text = "Status: ${
+                    business.storeStatus.ifBlank {
+                        "Not provided"
+                    }
+                }",
+                style = MaterialTheme.typography.titleMedium
             )
 
             Text(

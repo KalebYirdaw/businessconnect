@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -15,12 +15,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 fun BusinessInfoScreen(
@@ -30,15 +33,61 @@ fun BusinessInfoScreen(
     onDelete: () -> Unit
 ) {
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    val database =
+        remember {
+            BusinessDatabase.getDatabase(
+                context
+            )
+        }
+
+    val productRepository =
+        remember {
+            ProductRepository(
+                database.productDao()
+            )
+        }
+
+    val productFactory =
+        remember {
+            ProductViewModelFactory(
+                productRepository
+            )
+        }
+
+    val productViewModel:
+            ProductViewModel =
+        viewModel(
+            key = "business_products_${business.id}",
+            factory = productFactory
+        )
+
+    val products by
+    productViewModel
+        .getProductsForBusiness(
+            business.id
+        )
+        .collectAsState(
+            initial = emptyList()
+        )
+
     var showDeleteDialog by remember {
         mutableStateOf(false)
     }
 
+    val missingProducts =
+        products.filter {
+            it.availability == "Missing"
+        }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(24.dp)
-            .verticalScroll(rememberScrollState())
     ) {
 
         TextButton(
@@ -52,54 +101,19 @@ fun BusinessInfoScreen(
         )
 
         Text(
-            text = business.businessName.ifBlank {
-                "Business Information"
-            },
-            style = MaterialTheme.typography.headlineMedium
+            text = "Business Information",
+            style =
+                MaterialTheme.typography
+                    .headlineMedium
         )
 
         Spacer(
-            modifier = Modifier.height(16.dp)
+            modifier = Modifier.height(24.dp)
         )
 
-        // ==================================================
-        // EDIT BUTTON
-        // ==================================================
-
-        Button(
-            onClick = onEdit,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Edit Business")
-        }
-
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
-
-        // ==================================================
-        // DELETE BUTTON
-        // ==================================================
-
-        TextButton(
-            onClick = {
-                showDeleteDialog = true
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "Delete Business",
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
-
-        // ==================================================
-        // BUSINESS DETAILS
-        // ==================================================
+        /*
+         * BUSINESS DETAILS
+         */
 
         InfoSection(
             title = "Business Details"
@@ -116,17 +130,22 @@ fun BusinessInfoScreen(
             )
 
             InfoRow(
+                label = "Store Status",
+                value = business.storeStatus
+            )
+
+            InfoRow(
                 label = "Registration Number",
                 value = business.registrationNumber
             )
 
             InfoRow(
-                label = "Business Phone",
+                label = "Phone Number",
                 value = business.businessPhone
             )
 
             InfoRow(
-                label = "Business Email",
+                label = "Email Address",
                 value = business.businessEmail
             )
         }
@@ -135,12 +154,12 @@ fun BusinessInfoScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // ==================================================
-        // OWNER DETAILS
-        // ==================================================
+        /*
+         * OWNER DETAILS
+         */
 
         InfoSection(
-            title = "Owner Details"
+            title = "Owner / Contact"
         ) {
 
             InfoRow(
@@ -154,12 +173,12 @@ fun BusinessInfoScreen(
             )
 
             InfoRow(
-                label = "Owner Phone",
+                label = "Phone Number",
                 value = business.ownerPhone
             )
 
             InfoRow(
-                label = "Owner Email",
+                label = "Email Address",
                 value = business.ownerEmail
             )
         }
@@ -168,9 +187,9 @@ fun BusinessInfoScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // ==================================================
-        // LOCATION
-        // ==================================================
+        /*
+         * LOCATION
+         */
 
         InfoSection(
             title = "Location"
@@ -211,48 +230,189 @@ fun BusinessInfoScreen(
             modifier = Modifier.height(16.dp)
         )
 
-        // ==================================================
-        // PRODUCT
-        // ==================================================
+        /*
+         * PRODUCTS
+         */
 
-        InfoSection(
-            title = "Product"
+        Card(
+            modifier =
+                Modifier.fillMaxWidth()
         ) {
 
-            InfoRow(
-                label = "Product Name",
-                value = business.productName
-            )
+            Column(
+                modifier =
+                    Modifier.padding(16.dp)
+            ) {
 
-            InfoRow(
-                label = "Category",
-                value = business.productCategory
-            )
+                Text(
+                    text = "Product Assessment",
+                    style =
+                        MaterialTheme.typography
+                            .titleLarge
+                )
 
-            InfoRow(
-                label = "Description",
-                value = business.productDescription
-            )
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)
+                )
 
-            InfoRow(
-                label = "Price",
-                value = business.price
-            )
+                if (products.isEmpty()) {
 
-            InfoRow(
-                label = "Quantity",
-                value = business.quantity
-            )
+                    Text(
+                        text =
+                            "No products recorded.",
+
+                        style =
+                            MaterialTheme.typography
+                                .bodyMedium
+                    )
+
+                } else {
+
+                    Text(
+                        text =
+                            "${products.size} product(s) assessed",
+
+                        style =
+                            MaterialTheme.typography
+                                .bodyLarge
+                    )
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(12.dp)
+                    )
+
+                    products.forEach { product ->
+
+                        ProductInfoCard(
+                            product = product
+                        )
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(12.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
+
+        /*
+         * OPPORTUNITY
+         */
+
+        Card(
+            modifier =
+                Modifier.fillMaxWidth()
+        ) {
+
+            Column(
+                modifier =
+                    Modifier.padding(16.dp)
+            ) {
+
+                Text(
+                    text =
+                        "Opportunity Summary",
+
+                    style =
+                        MaterialTheme.typography
+                            .titleLarge
+                )
+
+                Spacer(
+                    modifier =
+                        Modifier.height(12.dp)
+                )
+
+                if (missingProducts.isEmpty()) {
+
+                    Text(
+                        text =
+                            "No missing products identified.",
+
+                        style =
+                            MaterialTheme.typography
+                                .bodyMedium
+                    )
+
+                } else {
+
+                    Text(
+                        text =
+                            "${missingProducts.size} missing product(s)",
+
+                        style =
+                            MaterialTheme.typography
+                                .bodyLarge
+                    )
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(8.dp)
+                    )
+
+                    missingProducts.forEach { product ->
+
+                        Text(
+                            text =
+                                "• ${product.productName}",
+
+                            style =
+                                MaterialTheme.typography
+                                    .bodyMedium
+                        )
+                    }
+                }
+            }
         }
 
         Spacer(
             modifier = Modifier.height(24.dp)
         )
+
+        /*
+         * ACTIONS
+         */
+
+        Button(
+            onClick = onEdit,
+            modifier =
+                Modifier.fillMaxWidth()
+        ) {
+
+            Text("Edit Business")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        TextButton(
+            onClick = {
+                showDeleteDialog = true
+            },
+
+            modifier =
+                Modifier.fillMaxWidth()
+        ) {
+
+            Text("Delete Business")
+        }
+
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
     }
 
-    // ======================================================
-    // DELETE CONFIRMATION
-    // ======================================================
+    /*
+     * DELETE CONFIRMATION
+     */
 
     if (showDeleteDialog) {
 
@@ -268,9 +428,7 @@ fun BusinessInfoScreen(
 
             text = {
                 Text(
-                    "Are you sure you want to delete " +
-                            "\"${business.businessName}\"? " +
-                            "This action cannot be undone."
+                    "Are you sure you want to delete ${business.businessName}? This will also remove its product assessments."
                 )
             },
 
@@ -285,10 +443,7 @@ fun BusinessInfoScreen(
                     }
                 ) {
 
-                    Text(
-                        text = "Delete",
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Text("Delete")
                 }
             },
 
@@ -314,20 +469,26 @@ private fun InfoSection(
 ) {
 
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier =
+            Modifier.fillMaxWidth()
     ) {
 
         Column(
-            modifier = Modifier.padding(16.dp)
+            modifier =
+                Modifier.padding(16.dp)
         ) {
 
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge
+
+                style =
+                    MaterialTheme.typography
+                        .titleLarge
             )
 
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier =
+                    Modifier.height(12.dp)
             )
 
             content()
@@ -342,21 +503,125 @@ private fun InfoRow(
 ) {
 
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottom = 10.dp)
+        modifier =
+            Modifier.fillMaxWidth()
     ) {
 
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium
+
+            style =
+                MaterialTheme.typography
+                    .labelLarge
         )
 
         Text(
-            text = value.ifBlank {
-                "Not provided"
-            },
-            style = MaterialTheme.typography.bodyLarge
+            text =
+                value.ifBlank {
+                    "Not provided"
+                },
+
+            style =
+                MaterialTheme.typography
+                    .bodyMedium
         )
+
+        Spacer(
+            modifier =
+                Modifier.height(8.dp)
+        )
+    }
+}
+
+@Composable
+private fun ProductInfoCard(
+    product: ProductEntity
+) {
+
+    Card(
+        modifier =
+            Modifier.fillMaxWidth()
+    ) {
+
+        Column(
+            modifier =
+                Modifier.padding(16.dp)
+        ) {
+
+            Text(
+                text =
+                    product.productName,
+
+                style =
+                    MaterialTheme.typography
+                        .titleMedium
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(4.dp)
+            )
+
+            Text(
+                text =
+                    "Category: ${
+                        product.productCategory
+                    }",
+
+                style =
+                    MaterialTheme.typography
+                        .bodyMedium
+            )
+
+            Text(
+                text =
+                    "Availability: ${
+                        product.availability
+                    }",
+
+                style =
+                    MaterialTheme.typography
+                        .bodyMedium
+            )
+
+            Text(
+                text =
+                    "Quantity: ${
+                        product.quantity.ifBlank {
+                            "Not provided"
+                        }
+                    }",
+
+                style =
+                    MaterialTheme.typography
+                        .bodyMedium
+            )
+
+            Text(
+                text =
+                    "Price: ${
+                        product.price.ifBlank {
+                            "Not provided"
+                        }
+                    }",
+
+                style =
+                    MaterialTheme.typography
+                        .bodyMedium
+            )
+
+            Text(
+                text =
+                    "Notes: ${
+                        product.notes.ifBlank {
+                            "Not provided"
+                        }
+                    }",
+
+                style =
+                    MaterialTheme.typography
+                        .bodyMedium
+            )
+        }
     }
 }

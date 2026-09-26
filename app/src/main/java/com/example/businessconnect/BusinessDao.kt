@@ -11,17 +11,36 @@ import kotlinx.coroutines.flow.Flow
 interface BusinessDao {
 
     @Insert
-    suspend fun insertBusiness(business: BusinessEntity): Long
-
-    @Query("SELECT * FROM businesses ORDER BY id DESC")
-    fun getAllBusinesses(): Flow<List<BusinessEntity>>
-
-    @Query("SELECT * FROM businesses WHERE id = :businessId")
-    suspend fun getBusinessById(businessId: Int): BusinessEntity?
+    suspend fun insertBusiness(
+        business: BusinessEntity
+    ): Long
 
     @Update
-    suspend fun updateBusiness(business: BusinessEntity)
+    suspend fun updateBusiness(
+        business: BusinessEntity
+    )
 
     @Delete
-    suspend fun deleteBusiness(business: BusinessEntity)
+    suspend fun deleteBusiness(
+        business: BusinessEntity
+    )
+
+    @Query(
+        """
+        SELECT * FROM businesses
+        ORDER BY id DESC
+        """
+    )
+    fun getAllBusinesses(): Flow<List<BusinessEntity>>
+
+    @Query(
+        """
+        SELECT * FROM businesses
+        WHERE id = :id
+        LIMIT 1
+        """
+    )
+    suspend fun getBusinessById(
+        id: Int
+    ): BusinessEntity?
 }

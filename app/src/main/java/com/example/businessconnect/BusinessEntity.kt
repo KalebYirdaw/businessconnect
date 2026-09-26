@@ -27,6 +27,8 @@ data class BusinessEntity(
     val latitude: String = "",
     val longitude: String = "",
 
+    val storeStatus: String = "New Prospect",
+
     val productName: String = "",
     val productCategory: String = "",
     val productDescription: String = "",

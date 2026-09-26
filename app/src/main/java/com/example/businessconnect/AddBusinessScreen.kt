@@ -1,6 +1,7 @@
 package com.example.businessconnect
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -18,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -49,6 +52,10 @@ fun AddBusinessScreen(
         mutableStateOf(businessData.businessEmail)
     }
 
+    var storeStatus by remember {
+        mutableStateOf(businessData.storeStatus)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -64,21 +71,27 @@ fun AddBusinessScreen(
             Text("← Back")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         Text(
             text = "Add Business",
             style = MaterialTheme.typography.headlineMedium
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         Text(
             text = "Step 1 of 4 • Business Details",
             style = MaterialTheme.typography.bodyLarge
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
 
         OutlinedTextField(
             value = businessName,
@@ -92,7 +105,9 @@ fun AddBusinessScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         OutlinedTextField(
             value = businessType,
@@ -106,7 +121,9 @@ fun AddBusinessScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         OutlinedTextField(
             value = registrationNumber,
@@ -120,7 +137,9 @@ fun AddBusinessScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         OutlinedTextField(
             value = phoneNumber,
@@ -134,7 +153,9 @@ fun AddBusinessScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(
+            modifier = Modifier.height(16.dp)
+        )
 
         OutlinedTextField(
             value = email,
@@ -148,21 +169,83 @@ fun AddBusinessScreen(
             singleLine = true
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(
+            modifier = Modifier.height(24.dp)
+        )
+
+        Text(
+            text = "Store Status",
+            style = MaterialTheme.typography.titleMedium
+        )
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            RadioButton(
+                selected = storeStatus == "New Prospect",
+                onClick = {
+                    storeStatus = "New Prospect"
+                }
+            )
+
+            Text(
+                text = "New Prospect"
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            RadioButton(
+                selected = storeStatus == "Existing Store",
+                onClick = {
+                    storeStatus = "Existing Store"
+                }
+            )
+
+            Text(
+                text = "Existing Store"
+            )
+        }
+
+        Spacer(
+            modifier = Modifier.height(32.dp)
+        )
 
         Button(
             onClick = {
 
-                businessData.businessName = businessName
-                businessData.businessType = businessType
-                businessData.registrationNumber = registrationNumber
-                businessData.businessPhone = phoneNumber
-                businessData.businessEmail = email
+                businessData.businessName =
+                    businessName
+
+                businessData.businessType =
+                    businessType
+
+                businessData.registrationNumber =
+                    registrationNumber
+
+                businessData.businessPhone =
+                    phoneNumber
+
+                businessData.businessEmail =
+                    email
+
+                businessData.storeStatus =
+                    storeStatus
 
                 onNext()
             },
             modifier = Modifier.fillMaxWidth()
         ) {
+
             Text("Next")
         }
     }

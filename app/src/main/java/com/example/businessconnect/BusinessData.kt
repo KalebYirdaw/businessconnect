@@ -19,9 +19,13 @@ data class BusinessData(
     var latitude: String = "",
     var longitude: String = "",
 
+    var storeStatus: String = "New Prospect",
+
     var productName: String = "",
     var productCategory: String = "",
     var productDescription: String = "",
     var price: String = "",
-    var quantity: String = ""
+    var quantity: String = "",
+
+    var products: List<ProductAssessment> = emptyList()
 )
