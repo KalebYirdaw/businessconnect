@@ -1,4 +1,5 @@
 package com.example.businessconnect
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,8 +26,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +71,6 @@ private fun BusinessConnectRoot() {
 
     val context =
         LocalContext.current
-
 
     val database =
         remember {
@@ -295,6 +297,9 @@ fun BusinessConnectApp(
             "dashboard" -> {
 
                 DashboardScreen(
+
+                    viewModel =
+                        viewModel,
 
                     modifier =
                         Modifier.padding(
@@ -749,6 +754,8 @@ fun BusinessConnectApp(
 @Composable
 fun DashboardScreen(
 
+    viewModel: BusinessViewModel,
+
     modifier: Modifier =
         Modifier,
 
@@ -757,6 +764,40 @@ fun DashboardScreen(
     onViewBusinesses: () -> Unit
 
 ) {
+
+    // ---------------------------------------------------------
+    // LIVE BUSINESS DATA
+    // ---------------------------------------------------------
+
+    val businesses by viewModel.businesses
+        .collectAsState(initial = emptyList())
+
+
+    // ---------------------------------------------------------
+    // LIVE STATISTICS
+    // ---------------------------------------------------------
+
+    val totalBusinesses =
+        businesses.size
+
+    val newProspects =
+        businesses.count {
+            it.storeStatus == "New Prospect"
+        }
+
+    val existingStores =
+        businesses.count {
+            it.storeStatus == "Existing Store"
+        }
+
+    val locationsCaptured =
+        businesses.count {
+            it.city.isNotBlank() ||
+                    it.province.isNotBlank() ||
+                    it.latitude.isNotBlank() ||
+                    it.longitude.isNotBlank()
+        }
+
 
     // ---------------------------------------------------------
     // DARK THEME COLOURS
@@ -925,7 +966,11 @@ fun DashboardScreen(
                 Text(
 
                     text =
-                        "Manage businesses and capture new sales opportunities.",
+                        if (totalBusinesses == 0) {
+                            "Manage businesses and capture new sales opportunities."
+                        } else {
+                            "You currently have $totalBusinesses captured business${if (totalBusinesses == 1) "" else "es"} in your pipeline."
+                        },
 
                     color =
                         secondaryText,
@@ -939,7 +984,7 @@ fun DashboardScreen(
 
 
             // -------------------------------------------------
-            // STATS
+            // PRIMARY STATS
             // -------------------------------------------------
 
             item {
@@ -967,7 +1012,7 @@ fun DashboardScreen(
                             "B",
 
                         value =
-                            "0",
+                            totalBusinesses.toString(),
 
                         label =
                             "Businesses",
@@ -1001,7 +1046,7 @@ fun DashboardScreen(
                             "L",
 
                         value =
-                            "0",
+                            locationsCaptured.toString(),
 
                         label =
                             "Locations",
@@ -1017,6 +1062,76 @@ fun DashboardScreen(
 
                         textColor =
                             white,
+
+                        secondaryColor =
+                            secondaryText
+
+                    )
+                }
+            }
+
+
+            // -------------------------------------------------
+            // PIPELINE STATUS
+            // -------------------------------------------------
+
+            item {
+
+                Row(
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            12.dp
+                        )
+
+                ) {
+
+                    DashboardMiniStat(
+
+                        modifier =
+                            Modifier.weight(
+                                1f
+                            ),
+
+                        value =
+                            newProspects.toString(),
+
+                        label =
+                            "New Prospects",
+
+                        valueColor =
+                            brightBlue,
+
+                        cardColor =
+                            cardBlack,
+
+                        secondaryColor =
+                            secondaryText
+
+                    )
+
+
+                    DashboardMiniStat(
+
+                        modifier =
+                            Modifier.weight(
+                                1f
+                            ),
+
+                        value =
+                            existingStores.toString(),
+
+                        label =
+                            "Existing Stores",
+
+                        valueColor =
+                            green,
+
+                        cardColor =
+                            cardBlack,
 
                         secondaryColor =
                             secondaryText
@@ -1297,7 +1412,7 @@ fun DashboardScreen(
 
 
             // -------------------------------------------------
-            // SALES OVERVIEW
+            // RECENT BUSINESSES
             // -------------------------------------------------
 
             item {
@@ -1305,7 +1420,7 @@ fun DashboardScreen(
                 Text(
 
                     text =
-                        "Sales Overview",
+                        "Recent Businesses",
 
                     color =
                         white,
@@ -1321,98 +1436,34 @@ fun DashboardScreen(
             }
 
 
-            item {
+            if (businesses.isEmpty()) {
 
-                Card(
+                item {
 
-                    modifier =
-                        Modifier.fillMaxWidth(),
-
-                    shape =
-                        RoundedCornerShape(
-                            18.dp
-                        ),
-
-                    colors =
-                        CardDefaults.cardColors(
-                            containerColor =
-                                cardBlack
-                        ),
-
-                    elevation =
-                        CardDefaults.cardElevation(
-                            defaultElevation =
-                                1.dp
-                        )
-
-                ) {
-
-                    Column(
+                    Card(
 
                         modifier =
-                            Modifier.padding(
-                                20.dp
+                            Modifier.fillMaxWidth(),
+
+                        shape =
+                            RoundedCornerShape(
+                                18.dp
+                            ),
+
+                        colors =
+                            CardDefaults.cardColors(
+                                containerColor =
+                                    cardBlack
                             )
 
                     ) {
 
-                        Text(
-
-                            text =
-                                "Business opportunities",
-
-                            color =
-                                white,
-
-                            style =
-                                MaterialTheme.typography
-                                    .titleMedium,
-
-                            fontWeight =
-                                FontWeight.SemiBold
-
-                        )
-
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(8.dp)
-                        )
-
-
-                        Text(
-
-                            text =
-                                "Your captured businesses and product opportunities will appear here.",
-
-                            color =
-                                secondaryText,
-
-                            style =
-                                MaterialTheme.typography
-                                    .bodyMedium
-
-                        )
-
-
-                        Spacer(
-                            modifier =
-                                Modifier.height(16.dp)
-                        )
-
-
-                        Surface(
+                        Column(
 
                             modifier =
-                                Modifier.fillMaxWidth(),
-
-                            shape =
-                                RoundedCornerShape(
-                                    12.dp
-                                ),
-
-                            color =
-                                elevatedBlack
+                                Modifier.padding(
+                                    20.dp
+                                )
 
                         ) {
 
@@ -1421,26 +1472,85 @@ fun DashboardScreen(
                                 text =
                                     "NO BUSINESS DATA YET",
 
-                                modifier =
-                                    Modifier.padding(
-                                        14.dp
-                                    ),
-
                                 color =
                                     brightBlue,
 
                                 style =
                                     MaterialTheme.typography
-                                        .bodySmall,
+                                        .labelLarge,
 
                                 fontWeight =
                                     FontWeight.Bold
+
+                            )
+
+
+                            Spacer(
+                                modifier =
+                                    Modifier.height(8.dp)
+                            )
+
+
+                            Text(
+
+                                text =
+                                    "Start by capturing your first business opportunity.",
+
+                                color =
+                                    secondaryText,
+
+                                style =
+                                    MaterialTheme.typography
+                                        .bodyMedium
 
                             )
                         }
                     }
                 }
 
+            } else {
+
+                val recentBusinesses =
+                    businesses
+                        .asReversed()
+                        .take(3)
+
+                items(
+                    count =
+                        recentBusinesses.size
+                ) { index ->
+
+                    val business =
+                        recentBusinesses[index]
+
+                    RecentBusinessCard(
+
+                        business =
+                            business,
+
+                        cardColor =
+                            cardBlack,
+
+                        elevatedColor =
+                            elevatedBlack,
+
+                        white =
+                            white,
+
+                        secondaryColor =
+                            secondaryText,
+
+                        blue =
+                            brightBlue,
+
+                        green =
+                            green
+                    )
+                }
+            }
+
+
+            item {
 
                 Spacer(
                     modifier =
@@ -1594,5 +1704,459 @@ private fun DashboardStatCard(
 
             )
         }
+    }
+}
+
+
+// =============================================================
+// DASHBOARD MINI STAT
+// =============================================================
+
+@Composable
+private fun DashboardMiniStat(
+
+    modifier: Modifier,
+
+    value: String,
+
+    label: String,
+
+    valueColor: Color,
+
+    cardColor: Color,
+
+    secondaryColor: Color
+
+) {
+
+    Card(
+
+        modifier =
+            modifier,
+
+        shape =
+            RoundedCornerShape(
+                16.dp
+            ),
+
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    cardColor
+            ),
+
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation =
+                    1.dp
+            )
+
+    ) {
+
+        Column(
+
+            modifier =
+                Modifier.padding(
+                    16.dp
+                )
+
+        ) {
+
+            Text(
+
+                text =
+                    value,
+
+                color =
+                    valueColor,
+
+                style =
+                    MaterialTheme.typography
+                        .headlineSmall,
+
+                fontWeight =
+                    FontWeight.Bold
+
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(3.dp)
+            )
+
+
+            Text(
+
+                text =
+                    label,
+
+                color =
+                    secondaryColor,
+
+                style =
+                    MaterialTheme.typography
+                        .bodySmall
+
+            )
+        }
+    }
+}
+
+
+// =============================================================
+// RECENT BUSINESS CARD
+// =============================================================
+
+@Composable
+private fun RecentBusinessCard(
+
+    business: BusinessEntity,
+
+    cardColor: Color,
+
+    elevatedColor: Color,
+
+    white: Color,
+
+    secondaryColor: Color,
+
+    blue: Color,
+
+    green: Color
+
+) {
+
+    Card(
+
+        modifier =
+            Modifier.fillMaxWidth(),
+
+        shape =
+            RoundedCornerShape(
+                18.dp
+            ),
+
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    cardColor
+            ),
+
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation =
+                    1.dp
+            )
+
+    ) {
+
+        Column(
+
+            modifier =
+                Modifier.padding(
+                    18.dp
+                )
+
+        ) {
+
+            Row(
+
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                verticalAlignment =
+                    Alignment.CenterVertically
+
+            ) {
+
+                Column(
+                    modifier =
+                        Modifier.weight(1f)
+                ) {
+
+                    Text(
+
+                        text =
+                            business.businessName
+                                .ifBlank {
+                                    "Unnamed Business"
+                                },
+
+                        color =
+                            white,
+
+                        style =
+                            MaterialTheme.typography
+                                .titleMedium,
+
+                        fontWeight =
+                            FontWeight.Bold
+
+                    )
+
+
+                    Spacer(
+                        modifier =
+                            Modifier.height(3.dp)
+                    )
+
+
+                    Text(
+
+                        text =
+                            business.businessType
+                                .ifBlank {
+                                    "Business"
+                                },
+
+                        color =
+                            secondaryColor,
+
+                        style =
+                            MaterialTheme.typography
+                                .bodySmall
+
+                    )
+                }
+
+
+                Surface(
+
+                    shape =
+                        RoundedCornerShape(
+                            8.dp
+                        ),
+
+                    color =
+                        if (
+                            business.storeStatus ==
+                            "Existing Store"
+                        ) {
+
+                            Color(
+                                0xFF173B28
+                            )
+
+                        } else {
+
+                            Color(
+                                0xFF12314A
+                            )
+                        }
+
+                ) {
+
+                    Text(
+
+                        text =
+                            business.storeStatus
+                                .uppercase(),
+
+                        modifier =
+                            Modifier.padding(
+                                horizontal = 9.dp,
+                                vertical = 6.dp
+                            ),
+
+                        color =
+                            if (
+                                business.storeStatus ==
+                                "Existing Store"
+                            ) {
+                                green
+                            } else {
+                                blue
+                            },
+
+                        style =
+                            MaterialTheme.typography
+                                .labelSmall,
+
+                        fontWeight =
+                            FontWeight.Bold
+
+                    )
+                }
+            }
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(14.dp)
+            )
+
+
+            Surface(
+
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                shape =
+                    RoundedCornerShape(
+                        10.dp
+                    ),
+
+                color =
+                    elevatedColor
+
+            ) {
+
+                Column(
+
+                    modifier =
+                        Modifier.padding(
+                            12.dp
+                        )
+
+                ) {
+
+                    if (
+                        business.ownerName
+                            .isNotBlank()
+                    ) {
+
+                        DashboardDetailRow(
+                            label =
+                                "Owner",
+
+                            value =
+                                business.ownerName,
+
+                            white =
+                                white,
+
+                            secondaryColor =
+                                secondaryColor
+                        )
+                    }
+
+
+                    if (
+                        business.city
+                            .isNotBlank() ||
+                        business.province
+                            .isNotBlank()
+                    ) {
+
+                        DashboardDetailRow(
+                            label =
+                                "Location",
+
+                            value =
+                                listOf(
+                                    business.city,
+                                    business.province
+                                )
+                                    .filter {
+                                        it.isNotBlank()
+                                    }
+                                    .joinToString(
+                                        ", "
+                                    ),
+
+                            white =
+                                white,
+
+                            secondaryColor =
+                                secondaryColor
+                        )
+                    }
+
+
+                    if (
+                        business.productName
+                            .isNotBlank()
+                    ) {
+
+                        DashboardDetailRow(
+                            label =
+                                "Product",
+
+                            value =
+                                business.productName,
+
+                            white =
+                                white,
+
+                            secondaryColor =
+                                secondaryColor
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+// =============================================================
+// DASHBOARD DETAIL ROW
+// =============================================================
+
+@Composable
+private fun DashboardDetailRow(
+
+    label: String,
+
+    value: String,
+
+    white: Color,
+
+    secondaryColor: Color
+
+) {
+
+    Row(
+
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(
+                    vertical = 3.dp
+                ),
+
+        horizontalArrangement =
+            Arrangement.SpaceBetween
+
+    ) {
+
+        Text(
+
+            text =
+                label,
+
+            color =
+                secondaryColor,
+
+            style =
+                MaterialTheme.typography
+                    .bodySmall
+
+        )
+
+
+        Spacer(
+            modifier =
+                Modifier.width(10.dp)
+        )
+
+
+        Text(
+
+            text =
+                value,
+
+            color =
+                white,
+
+            style =
+                MaterialTheme.typography
+                    .bodySmall,
+
+            fontWeight =
+                FontWeight.Medium
+
+        )
     }
 }
