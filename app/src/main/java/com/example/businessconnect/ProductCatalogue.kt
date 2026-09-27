@@ -52,11 +52,6 @@ object ProductCatalogue {
         CatalogueProduct(
             name = "Water",
             category = "Water"
-        ),
-
-        CatalogueProduct(
-            name = "Other Product",
-            category = "Other"
         )
     )
 }

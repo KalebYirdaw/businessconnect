@@ -1,18 +1,29 @@
 package com.example.businessconnect
-
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,7 +33,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.businessconnect.ui.theme.BusinessConnectTheme
@@ -505,7 +519,6 @@ fun BusinessConnectApp(
                                     businessData
                                         .businessEmail,
 
-
                                 ownerName =
                                     businessData
                                         .ownerName,
@@ -521,7 +534,6 @@ fun BusinessConnectApp(
                                 ownerEmail =
                                     businessData
                                         .ownerEmail,
-
 
                                 streetAddress =
                                     businessData
@@ -547,11 +559,9 @@ fun BusinessConnectApp(
                                     businessData
                                         .longitude,
 
-
                                 storeStatus =
                                     businessData
                                         .storeStatus,
-
 
                                 productName =
                                     businessData
@@ -708,7 +718,6 @@ fun BusinessConnectApp(
                                 updatedBusiness,
                                 updatedProducts ->
 
-
                             viewModel.updateBusiness(
 
                                 business =
@@ -718,10 +727,8 @@ fun BusinessConnectApp(
                                     updatedProducts
                             )
 
-
                             selectedBusiness =
                                 updatedBusiness
-
 
                             currentScreen =
                                 "businessInfo"
@@ -751,101 +758,841 @@ fun DashboardScreen(
 
 ) {
 
+    // ---------------------------------------------------------
+    // DARK THEME COLOURS
+    // ---------------------------------------------------------
+
+    val background =
+        Color(0xFF080A0D)
+
+    val cardBlack =
+        Color(0xFF11151A)
+
+    val elevatedBlack =
+        Color(0xFF171C22)
+
+    val primaryBlue =
+        Color(0xFF0066CC)
+
+    val brightBlue =
+        Color(0xFF00AEEF)
+
+    val darkBlue =
+        Color(0xFF004B93)
+
+    val white =
+        Color(0xFFFFFFFF)
+
+    val secondaryText =
+        Color(0xFFB8C0C8)
+
+    val green =
+        Color(0xFF35C759)
+
+
     Column(
 
         modifier =
             modifier
                 .fillMaxSize()
-                .padding(24.dp),
-
-        horizontalAlignment =
-            Alignment.CenterHorizontally,
-
-        verticalArrangement =
-            Arrangement.Center
+                .background(
+                    background
+                )
 
     ) {
 
+        // -----------------------------------------------------
+        // HEADER
+        // -----------------------------------------------------
 
-        Text(
-
-            text =
-                "BusinessConnect",
-
-            style =
-                MaterialTheme.typography
-                    .headlineLarge
-
-        )
-
-
-        Spacer(
+        Box(
 
             modifier =
-                Modifier.height(12.dp)
-
-        )
-
-
-        Text(
-
-            text =
-                "Business Management Dashboard",
-
-            style =
-                MaterialTheme.typography
-                    .bodyLarge
-
-        )
-
-
-        Spacer(
-
-            modifier =
-                Modifier.height(32.dp)
-
-        )
-
-
-        Button(
-
-            onClick = {
-
-                onAddBusiness()
-
-            }
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        cardBlack
+                    )
+                    .padding(
+                        horizontal = 24.dp,
+                        vertical = 24.dp
+                    )
 
         ) {
 
-            Text(
-                "Add Business"
-            )
+            Column {
 
+                Text(
+
+                    text =
+                        "BusinessConnect",
+
+                    color =
+                        white,
+
+                    style =
+                        MaterialTheme.typography
+                            .headlineSmall,
+
+                    fontWeight =
+                        FontWeight.Bold
+
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(6.dp)
+                )
+
+
+                Text(
+
+                    text =
+                        "FIELD SALES DASHBOARD",
+
+                    color =
+                        brightBlue,
+
+                    style =
+                        MaterialTheme.typography
+                            .labelMedium,
+
+                    fontWeight =
+                        FontWeight.Bold
+
+                )
+            }
         }
 
 
-        Spacer(
+        // -----------------------------------------------------
+        // CONTENT
+        // -----------------------------------------------------
+
+        LazyColumn(
 
             modifier =
-                Modifier.height(16.dp)
+                Modifier
+                    .fillMaxSize()
+                    .padding(
+                        horizontal = 20.dp
+                    ),
 
-        )
-
-
-        Button(
-
-            onClick = {
-
-                onViewBusinesses()
-
-            }
+            verticalArrangement =
+                Arrangement.spacedBy(
+                    16.dp
+                )
 
         ) {
 
-            Text(
-                "View Businesses"
+            // -------------------------------------------------
+            // WELCOME
+            // -------------------------------------------------
+
+            item {
+
+                Spacer(
+                    modifier =
+                        Modifier.height(6.dp)
+                )
+
+
+                Text(
+
+                    text =
+                        "Welcome back",
+
+                    color =
+                        white,
+
+                    style =
+                        MaterialTheme.typography
+                            .headlineMedium,
+
+                    fontWeight =
+                        FontWeight.Bold
+
+                )
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(4.dp)
+                )
+
+
+                Text(
+
+                    text =
+                        "Manage businesses and capture new sales opportunities.",
+
+                    color =
+                        secondaryText,
+
+                    style =
+                        MaterialTheme.typography
+                            .bodyMedium
+
+                )
+            }
+
+
+            // -------------------------------------------------
+            // STATS
+            // -------------------------------------------------
+
+            item {
+
+                Row(
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    horizontalArrangement =
+                        Arrangement.spacedBy(
+                            12.dp
+                        )
+
+                ) {
+
+                    DashboardStatCard(
+
+                        modifier =
+                            Modifier.weight(
+                                1f
+                            ),
+
+                        symbol =
+                            "B",
+
+                        value =
+                            "0",
+
+                        label =
+                            "Businesses",
+
+                        iconBackground =
+                            darkBlue,
+
+                        iconColor =
+                            brightBlue,
+
+                        cardColor =
+                            cardBlack,
+
+                        textColor =
+                            white,
+
+                        secondaryColor =
+                            secondaryText
+
+                    )
+
+
+                    DashboardStatCard(
+
+                        modifier =
+                            Modifier.weight(
+                                1f
+                            ),
+
+                        symbol =
+                            "L",
+
+                        value =
+                            "0",
+
+                        label =
+                            "Locations",
+
+                        iconBackground =
+                            Color(0xFF173B28),
+
+                        iconColor =
+                            green,
+
+                        cardColor =
+                            cardBlack,
+
+                        textColor =
+                            white,
+
+                        secondaryColor =
+                            secondaryText
+
+                    )
+                }
+            }
+
+
+            // -------------------------------------------------
+            // PRIMARY ACTION
+            // -------------------------------------------------
+
+            item {
+
+                Card(
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    shape =
+                        RoundedCornerShape(
+                            20.dp
+                        ),
+
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor =
+                                cardBlack
+                        ),
+
+                    elevation =
+                        CardDefaults.cardElevation(
+                            defaultElevation =
+                                4.dp
+                        )
+
+                ) {
+
+                    Column(
+
+                        modifier =
+                            Modifier.padding(
+                                22.dp
+                            )
+
+                    ) {
+
+                        Text(
+
+                            text =
+                                "+",
+
+                            color =
+                                brightBlue,
+
+                            style =
+                                MaterialTheme.typography
+                                    .displaySmall,
+
+                            fontWeight =
+                                FontWeight.Bold
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(4.dp)
+                        )
+
+
+                        Text(
+
+                            text =
+                                "Add a New Business",
+
+                            color =
+                                white,
+
+                            style =
+                                MaterialTheme.typography
+                                    .titleLarge,
+
+                            fontWeight =
+                                FontWeight.Bold
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(4.dp)
+                        )
+
+
+                        Text(
+
+                            text =
+                                "Capture a new business opportunity.",
+
+                            color =
+                                secondaryText,
+
+                            style =
+                                MaterialTheme.typography
+                                    .bodyMedium
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(20.dp)
+                        )
+
+
+                        Button(
+
+                            onClick =
+                                onAddBusiness,
+
+                            modifier =
+                                Modifier.fillMaxWidth(),
+
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor =
+                                        primaryBlue,
+
+                                    contentColor =
+                                        white
+                                ),
+
+                            shape =
+                                RoundedCornerShape(
+                                    12.dp
+                                )
+
+                        ) {
+
+                            Text(
+
+                                text =
+                                    "START NEW BUSINESS",
+
+                                fontWeight =
+                                    FontWeight.Bold
+
+                            )
+                        }
+                    }
+                }
+            }
+
+
+            // -------------------------------------------------
+            // DIRECTORY
+            // -------------------------------------------------
+
+            item {
+
+                Card(
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    shape =
+                        RoundedCornerShape(
+                            18.dp
+                        ),
+
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor =
+                                cardBlack
+                        ),
+
+                    elevation =
+                        CardDefaults.cardElevation(
+                            defaultElevation =
+                                2.dp
+                        )
+
+                ) {
+
+                    Column(
+
+                        modifier =
+                            Modifier.padding(
+                                20.dp
+                            )
+
+                    ) {
+
+                        Text(
+
+                            text =
+                                "Business Directory",
+
+                            color =
+                                white,
+
+                            style =
+                                MaterialTheme.typography
+                                    .titleMedium,
+
+                            fontWeight =
+                                FontWeight.Bold
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(5.dp)
+                        )
+
+
+                        Text(
+
+                            text =
+                                "View and manage captured businesses.",
+
+                            color =
+                                secondaryText,
+
+                            style =
+                                MaterialTheme.typography
+                                    .bodySmall
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(16.dp)
+                        )
+
+
+                        Button(
+
+                            onClick =
+                                onViewBusinesses,
+
+                            modifier =
+                                Modifier.fillMaxWidth(),
+
+                            colors =
+                                ButtonDefaults.buttonColors(
+                                    containerColor =
+                                        elevatedBlack,
+
+                                    contentColor =
+                                        brightBlue
+                                ),
+
+                            shape =
+                                RoundedCornerShape(
+                                    10.dp
+                                )
+
+                        ) {
+
+                            Text(
+
+                                text =
+                                    "VIEW BUSINESSES",
+
+                                fontWeight =
+                                    FontWeight.Bold
+
+                            )
+                        }
+                    }
+                }
+            }
+
+
+            // -------------------------------------------------
+            // SALES OVERVIEW
+            // -------------------------------------------------
+
+            item {
+
+                Text(
+
+                    text =
+                        "Sales Overview",
+
+                    color =
+                        white,
+
+                    style =
+                        MaterialTheme.typography
+                            .titleLarge,
+
+                    fontWeight =
+                        FontWeight.Bold
+
+                )
+            }
+
+
+            item {
+
+                Card(
+
+                    modifier =
+                        Modifier.fillMaxWidth(),
+
+                    shape =
+                        RoundedCornerShape(
+                            18.dp
+                        ),
+
+                    colors =
+                        CardDefaults.cardColors(
+                            containerColor =
+                                cardBlack
+                        ),
+
+                    elevation =
+                        CardDefaults.cardElevation(
+                            defaultElevation =
+                                1.dp
+                        )
+
+                ) {
+
+                    Column(
+
+                        modifier =
+                            Modifier.padding(
+                                20.dp
+                            )
+
+                    ) {
+
+                        Text(
+
+                            text =
+                                "Business opportunities",
+
+                            color =
+                                white,
+
+                            style =
+                                MaterialTheme.typography
+                                    .titleMedium,
+
+                            fontWeight =
+                                FontWeight.SemiBold
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(8.dp)
+                        )
+
+
+                        Text(
+
+                            text =
+                                "Your captured businesses and product opportunities will appear here.",
+
+                            color =
+                                secondaryText,
+
+                            style =
+                                MaterialTheme.typography
+                                    .bodyMedium
+
+                        )
+
+
+                        Spacer(
+                            modifier =
+                                Modifier.height(16.dp)
+                        )
+
+
+                        Surface(
+
+                            modifier =
+                                Modifier.fillMaxWidth(),
+
+                            shape =
+                                RoundedCornerShape(
+                                    12.dp
+                                ),
+
+                            color =
+                                elevatedBlack
+
+                        ) {
+
+                            Text(
+
+                                text =
+                                    "NO BUSINESS DATA YET",
+
+                                modifier =
+                                    Modifier.padding(
+                                        14.dp
+                                    ),
+
+                                color =
+                                    brightBlue,
+
+                                style =
+                                    MaterialTheme.typography
+                                        .bodySmall,
+
+                                fontWeight =
+                                    FontWeight.Bold
+
+                            )
+                        }
+                    }
+                }
+
+
+                Spacer(
+                    modifier =
+                        Modifier.height(20.dp)
+                )
+            }
+        }
+    }
+}
+
+
+// =============================================================
+// DASHBOARD STAT CARD
+// =============================================================
+
+@Composable
+private fun DashboardStatCard(
+
+    modifier: Modifier,
+
+    symbol: String,
+
+    value: String,
+
+    label: String,
+
+    iconBackground: Color,
+
+    iconColor: Color,
+
+    cardColor: Color,
+
+    textColor: Color,
+
+    secondaryColor: Color
+
+) {
+
+    Card(
+
+        modifier =
+            modifier,
+
+        shape =
+            RoundedCornerShape(
+                18.dp
+            ),
+
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    cardColor
+            ),
+
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation =
+                    2.dp
             )
 
+    ) {
+
+        Column(
+
+            modifier =
+                Modifier.padding(
+                    18.dp
+                )
+
+        ) {
+
+            Box(
+
+                modifier =
+                    Modifier
+                        .size(42.dp)
+                        .clip(
+                            RoundedCornerShape(
+                                12.dp
+                            )
+                        )
+                        .background(
+                            iconBackground
+                        ),
+
+                contentAlignment =
+                    Alignment.Center
+
+            ) {
+
+                Text(
+
+                    text =
+                        symbol,
+
+                    color =
+                        iconColor,
+
+                    style =
+                        MaterialTheme.typography
+                            .titleMedium,
+
+                    fontWeight =
+                        FontWeight.Bold
+
+                )
+            }
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(14.dp)
+            )
+
+
+            Text(
+
+                text =
+                    value,
+
+                color =
+                    textColor,
+
+                style =
+                    MaterialTheme.typography
+                        .headlineMedium,
+
+                fontWeight =
+                    FontWeight.Bold
+
+            )
+
+
+            Spacer(
+                modifier =
+                    Modifier.height(2.dp)
+            )
+
+
+            Text(
+
+                text =
+                    label,
+
+                color =
+                    secondaryColor,
+
+                style =
+                    MaterialTheme.typography
+                        .bodySmall
+
+            )
         }
     }
 }
